@@ -152,6 +152,5 @@ It fails because it doesn’t match your defined route (`/`).
 
 ---
 
-## 🧠 Author
-
-[@Rami-shaar](https://github.com/Rami-shaar)
+**Rami Alshaar**  
+[GitHub Profile](https://github.com/Rami-shaar)
