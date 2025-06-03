@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda function for serverless backend logic
+
+Parameters:
+  LambdaFunctionName:
+    Type: String
+  LambdaRuntime:
+    Type: String
+  LambdaHandler:
+    Type: String
+  LambdaTimeout:
+    Type: Number
+  TableName:
+    Type: String
+  LambdaExecutionRoleArn:
+    Type: String
+  HttpApiId:  
+    Type: String
+
+Resources:
+  AppLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaFunctionName
+      Runtime: !Ref LambdaRuntime
+      Handler: !Ref LambdaHandler
+      Timeout: !Ref LambdaTimeout
+      Role: !Ref LambdaExecutionRoleArn
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            console.log("Received event:", JSON.stringify(event));
+
+            const path = event.rawPath || "no path";
+            const method = event.requestContext?.http?.method || "UNKNOWN";
+
+            return {
+              statusCode: 200,
+              body: JSON.stringify({
+                message: "It works!",
+                path,
+                method
+              })
+            };
+          };
+
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AppLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApiId}/*
+
+Outputs:
+  LambdaFunctionArn:
+    Description: ARN of the Lambda function
+    Value: !GetAtt AppLambdaFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-LambdaFunctionArn"
+
+
+

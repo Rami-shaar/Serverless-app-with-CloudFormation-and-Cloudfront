@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: API Gateway HTTP API for the Lambda function
+
+Parameters:
+  ApiName:
+    Type: String
+  LambdaFunctionArn:
+    Type: String
+
+Resources:
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Ref ApiName
+      ProtocolType: HTTP
+
+  HttpApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Ref LambdaFunctionArn
+      PayloadFormatVersion: "2.0"
+
+  RootRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "ANY /"
+      Target: !Sub "integrations/${HttpApiIntegration}"
+
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: prod
+      AutoDeploy: true
+
+Outputs:
+  ApiEndpoint:
+    Description: URL of the deployed API
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiEndpoint"
+
+  HttpApiId:
+    Description: ID of the created HTTP API
+    Value: !Ref HttpApi
+    Export:
+      Name: !Sub "${AWS::StackName}-HttpApiId"
+

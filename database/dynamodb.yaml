@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create DynamoDB table for the serverless app
+
+Parameters:
+  TableName:
+    Type: String
+    Description: Name of the DynamoDB table
+
+Resources:
+  AppTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  DynamoDBTableName:
+    Description: Name of the DynamoDB table
+    Value: !Ref AppTable
+    Export:
+      Name: !Sub "${AWS::StackName}-DynamoDBTableName"

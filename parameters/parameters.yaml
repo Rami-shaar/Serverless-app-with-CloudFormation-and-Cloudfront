@@ -1,0 +1,28 @@
+Parameters:
+  TableName:
+    Type: String
+    Default: MyAppItemsTable
+
+  LambdaFunctionName:
+    Type: String
+    Default: MyAppLambdaFunction
+
+  LambdaTimeout:
+    Type: Number
+    Default: 10
+
+  LambdaRuntime:
+    Type: String
+    Default: nodejs18.x
+
+  LambdaHandler:
+    Type: String
+    Default: index.handler
+
+  FrontendBucketName:
+    Type: String
+    Default: myapp-frontend-site
+
+  ApiName:
+    Type: String
+    Default: MyAppApi

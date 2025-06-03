@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudWatch Alarm for Lambda errors
+
+Parameters:
+  LambdaFunctionName:
+    Type: String
+    Description: Name of the Lambda function to monitor
+
+Resources:
+  LambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${LambdaFunctionName}-ErrorAlarm"
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunctionName
+      AlarmDescription: "Triggers when there is at least 1 error in 5 minutes"
+      ActionsEnabled: false
