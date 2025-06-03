@@ -1,7 +1,25 @@
 ﻿<!DOCTYPE html>
 <html>
-  <head><title>My Serverless App</title></head>
+  <head>
+    <title>My Serverless App</title>
+  </head>
   <body>
     <h1>Hello from my serverless S3 site!</h1>
+
+    <button onclick="callApi()">Call API</button>
+    <pre id="output"></pre>
+
+    <script>
+      async function callApi() {
+        try {
+          const response = await fetch("https://bcy5gf1yu6.execute-api.eu-west-2.amazonaws.com/prod/");
+          const data = await response.json();
+          document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+        } catch (err) {
+          document.getElementById("output").innerText = "Error: " + err;
+        }
+      }
+    </script>
   </body>
 </html>
+

@@ -13,13 +13,22 @@ Resources:
     Properties:
       Name: !Ref ApiName
       ProtocolType: HTTP
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowOrigins:
+          - "*"
+        AllowHeaders:
+          - "*"
 
   HttpApiIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref HttpApi
       IntegrationType: AWS_PROXY
-      IntegrationUri: !Ref LambdaFunctionArn
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArn}/invocations"
       PayloadFormatVersion: "2.0"
 
   RootRoute:
@@ -48,4 +57,7 @@ Outputs:
     Value: !Ref HttpApi
     Export:
       Name: !Sub "${AWS::StackName}-HttpApiId"
+
+
+
 

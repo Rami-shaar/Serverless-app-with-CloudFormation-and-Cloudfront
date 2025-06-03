@@ -23,7 +23,8 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Effect: Allow
+              - Sid: DynamoDBAccess
+                Effect: Allow
                 Action:
                   - dynamodb:GetItem
                   - dynamodb:PutItem
@@ -31,7 +32,9 @@ Resources:
                   - dynamodb:DeleteItem
                   - dynamodb:Scan
                 Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${TableName}"
-              - Effect: Allow
+
+              - Sid: CloudWatchLogsAccess
+                Effect: Allow
                 Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream

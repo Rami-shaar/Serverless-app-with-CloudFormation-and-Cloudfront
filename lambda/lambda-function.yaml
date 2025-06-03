@@ -14,7 +14,7 @@ Parameters:
     Type: String
   LambdaExecutionRoleArn:
     Type: String
-  HttpApiId:  
+  HttpApiId:
     Type: String
 
 Resources:
@@ -26,22 +26,54 @@ Resources:
       Handler: !Ref LambdaHandler
       Timeout: !Ref LambdaTimeout
       Role: !Ref LambdaExecutionRoleArn
+
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+
       Code:
         ZipFile: |
+          const AWS = require('aws-sdk');
+          const dynamodb = new AWS.DynamoDB();
+
           exports.handler = async (event) => {
-            console.log("Received event:", JSON.stringify(event));
+            const tableName = process.env.TABLE_NAME;
+            const itemId = "id-" + Date.now();
 
-            const path = event.rawPath || "no path";
-            const method = event.requestContext?.http?.method || "UNKNOWN";
-
-            return {
-              statusCode: 200,
-              body: JSON.stringify({
-                message: "It works!",
-                path,
-                method
-              })
+            const item = {
+              id: { S: itemId },
+              createdAt: { S: new Date().toISOString() }
             };
+
+            try {
+              await dynamodb.putItem({
+                TableName: tableName,
+                Item: item
+              }).promise();
+
+              return {
+                statusCode: 200,
+                headers: {
+                  "Access-Control-Allow-Origin": "*",
+                  "Access-Control-Allow-Headers": "*"
+                },
+                body: JSON.stringify({
+                  message: "Item successfully written to DynamoDB!",
+                  id: itemId,
+                  table: tableName
+                })
+              };
+            } catch (err) {
+              console.error("DynamoDB error:", err);
+              return {
+                statusCode: 500,
+                headers: {
+                  "Access-Control-Allow-Origin": "*",
+                  "Access-Control-Allow-Headers": "*"
+                },
+                body: JSON.stringify({ error: "Failed to write to DynamoDB." })
+              };
+            }
           };
 
   LambdaInvokePermission:
@@ -58,6 +90,9 @@ Outputs:
     Value: !GetAtt AppLambdaFunction.Arn
     Export:
       Name: !Sub "${AWS::StackName}-LambdaFunctionArn"
+
+
+
 
 
 
