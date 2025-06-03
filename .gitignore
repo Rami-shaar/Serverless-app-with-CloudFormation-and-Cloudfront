@@ -1,6 +1,22 @@
+# Build & dependencies
 *.zip
 *.log
-__pycache__/
-.env
-.aws-sam/
+node_modules/
 output.json
+
+# Python cache
+__pycache__/
+
+# AWS
+.aws-sam/
+.terraform/
+cdk.out/
+
+# Env & secrets
+.env
+
+# Editor & system files
+.vscode/
+.DS_Store
+Thumbs.db
+
