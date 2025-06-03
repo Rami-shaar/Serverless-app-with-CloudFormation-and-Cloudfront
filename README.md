@@ -76,8 +76,8 @@ aws cloudformation deploy \
     LambdaHandler=index.handler \
     LambdaTimeout=10 \
     TableName=MyAppItemsTable \
-    LambdaExecutionRoleArn=arn:aws:iam::123456789012:role/ServerlessIAM-LambdaExecutionRole \
-    HttpApiId=33wpd7j210
+    LambdaExecutionRoleArn=arn:aws:iam::<your-account-id>:role/ServerlessIAM-LambdaExecutionRole \
+    HttpApiId=<your-api-gateway-id>
 
 # 4. API Gateway
 aws cloudformation deploy \
@@ -85,13 +85,13 @@ aws cloudformation deploy \
   --stack-name ServerlessAPI \
   --parameter-overrides \
     ApiName=MyAppApi \
-    LambdaFunctionArn=arn:aws:lambda:eu-west-2:123456789012:function:MyAppLambdaFunction
+    LambdaFunctionArn=arn:aws:lambda:<your-region>:<your-account-id>:function:MyAppLambdaFunction
 
 # 5. S3 Frontend
 aws cloudformation deploy \
   --template-file frontend/s3-static-site.yaml \
   --stack-name ServerlessFrontend \
-  --parameter-overrides FrontendBucketName=myapp-frontend-bucket-123456789012
+  --parameter-overrides FrontendBucketName=myapp-frontend-bucket-<unique-suffix>
 
 # 6. CloudWatch Alarm
 aws cloudformation deploy \
@@ -107,12 +107,12 @@ aws cloudformation deploy \
 After the S3 bucket is created, upload the site:
 
 ```bash
-aws s3 cp index.html s3://myapp-frontend-bucket-123456789012/
+aws s3 cp index.html s3://myapp-frontend-bucket-<unique-suffix>/
 ```
 
 The URL is available in the `ServerlessFrontend` stack outputs:
 ```
-http://myapp-frontend-bucket-123456789012.s3-website.<region>.amazonaws.com
+http://myapp-frontend-bucket-<unique-suffix>.s3-website.<your-region>.amazonaws.com
 ```
 
 ---
@@ -124,7 +124,7 @@ You can test the deployed API by visiting the endpoint exposed by **API Gateway*
 ### ✅ Working URL (with `/` at the end):
 
 ```bash
-curl https://33wpd7j210.execute-api.eu-west-2.amazonaws.com/prod/
+curl https://<your-api-gateway-id>.execute-api.<your-region>.amazonaws.com/prod/
 ```
 
 This works because your route is defined as `ANY /`.
@@ -135,7 +135,7 @@ This works because your route is defined as `ANY /`.
 ### ❌ This will not work:
 
 ```bash
-curl https://33wpd7j210.execute-api.eu-west-2.amazonaws.com/prod
+curl https://<your-api-gateway-id>.execute-api.<your-region>.amazonaws.com/prod
 ```
 
 It fails because it doesn’t match your defined route (`/`).
