@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Static frontend with HTTPS via CloudFront
+Description: Static frontend hosted in S3 with secure CloudFront HTTPS access
 
 Parameters:
   FrontendBucketName:
@@ -15,23 +15,21 @@ Resources:
         IndexDocument: index.html
         ErrorDocument: index.html
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
 
-  BucketPolicy:
-    Type: AWS::S3::BucketPolicy
+  # Origin Access Control (OAC) to securely allow CloudFront access
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
     Properties:
-      Bucket: !Ref FrontendBucketName
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action: s3:GetObject
-            Resource: !Sub "${FrontendBucket.Arn}/*"
+      OriginAccessControlConfig:
+        Name: S3-OAC-Access
+        Description: OAC for CloudFront to access S3 bucket
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        OriginAccessControlOriginType: s3
 
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
@@ -42,10 +40,8 @@ Resources:
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt FrontendBucket.RegionalDomainName
-            CustomOriginConfig:
-              HTTPPort: 80
-              HTTPSPort: 443
-              OriginProtocolPolicy: http-only
+            S3OriginConfig: {}
+            OriginAccessControlId: !Ref CloudFrontOAC
         DefaultCacheBehavior:
           TargetOriginId: S3Origin
           ViewerProtocolPolicy: redirect-to-https
@@ -55,6 +51,7 @@ Resources:
           CachedMethods:
             - GET
             - HEAD
+          Compress: true
           ForwardedValues:
             QueryString: false
             Cookies:
@@ -62,10 +59,27 @@ Resources:
         ViewerCertificate:
           CloudFrontDefaultCertificate: true
 
+  # Secure bucket policy: only CloudFront can access S3
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucketName
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontService
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${FrontendBucketName}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+
 Outputs:
   FrontendWebsiteURL:
     Description: HTTPS CloudFront distribution URL
     Value: !Sub "https://${CloudFrontDistribution.DomainName}"
     Export:
       Name: !Sub "${AWS::StackName}-FrontendWebsiteURL"
-

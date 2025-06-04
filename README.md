@@ -9,7 +9,8 @@ This project deploys a **production-ready serverless application** using AWS Clo
 This serverless app includes:
 
 - **Amazon CloudFront (HTTPS CDN)** – Delivers the frontend securely over HTTPS  
-- **Amazon S3 (Static Website Hosting)** – Hosts the frontend with a dynamic button  
+- **Amazon S3 (Private Bucket + OAC)** – Hosts the static frontend privately  
+- **Origin Access Control (OAC)** – Allows CloudFront to securely fetch content from private S3  
 - **API Gateway (HTTP API)** – Receives frontend requests and triggers Lambda  
 - **AWS Lambda (Node.js)** – Serverless compute that writes to DynamoDB  
 - **Amazon DynamoDB** – Stores unique ID + timestamp on each API call  
@@ -18,9 +19,9 @@ This serverless app includes:
 
 ---
 
-## 🖱️ Button-to-Database Flow (S3 → API Gateway → Lambda → DynamoDB)
+## 🖱️ Button-to-Database Flow (CloudFront → API Gateway → Lambda → DynamoDB)
 
-1. The user visits the static frontend hosted on S3 (via CloudFront HTTPS).  
+1. The user visits the frontend served from a **CloudFront HTTPS URL**.  
 2. Clicking the **“Call API”** button triggers a `fetch()` call to the API Gateway endpoint.  
 3. API Gateway invokes the **Lambda function**.  
 4. Lambda writes a new item (`id` and `createdAt`) into the **DynamoDB table**.  
@@ -37,7 +38,7 @@ This serverless app includes:
 cloudformation-serverless-app/
 ├── api/                  # API Gateway with CORS + Lambda integration
 ├── database/             # DynamoDB table template
-├── frontend/             # S3 + CloudFront static website hosting
+├── frontend/             # Private S3 + CloudFront + OAC
 ├── iam/                  # IAM roles and permissions
 ├── lambda/               # Lambda function (inline Node.js)
 ├── monitoring/           # CloudWatch log configuration
@@ -88,11 +89,12 @@ aws cloudformation deploy \
     ApiName=MyAppApi \
     LambdaFunctionArn=arn:aws:lambda:<your-region>:<your-account-id>:function:MyAppLambdaFunction
 
-# 5. CloudFront + S3
+# 5. CloudFront + Private S3 (with OAC)
 aws cloudformation deploy \
-  --template-file frontend/s3-static-site.yaml \
+  --template-file frontend/s3-static-site-cloudfront.yaml \
   --stack-name ServerlessFrontend \
-  --parameter-overrides FrontendBucketName=myapp-frontend-site
+  --parameter-overrides FrontendBucketName=myapp-frontend-site \
+  --capabilities CAPABILITY_NAMED_IAM
 
 # 6. CloudWatch Logs
 aws cloudformation deploy \
@@ -161,3 +163,4 @@ Whether you test using the frontend or directly, you should receive:
 
 **Rami Alshaar**  
 [GitHub Profile](https://github.com/your-github-username)
+

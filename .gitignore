@@ -1,22 +1,32 @@
-# Build & dependencies
+# Build artifacts
 *.zip
 *.log
-node_modules/
+*.bak
 output.json
 
-# Python cache
+# Node dependencies (if used locally for Lambda packaging)
+node_modules/
+
+# Python cache (just in case)
 __pycache__/
 
-# AWS
+# AWS tool folders (optional if not using them)
 .aws-sam/
 .terraform/
 cdk.out/
 
-# Env & secrets
+# Secrets and environment files
 .env
 
-# Editor & system files
+# Editor and OS files
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Backup and generated CloudFormation templates
+*.template.json
+*.template.yaml
+
+# Deployment scripts (optional, for cleanliness)
+deploy.sh
 
