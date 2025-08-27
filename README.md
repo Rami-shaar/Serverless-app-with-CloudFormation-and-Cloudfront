@@ -3,6 +3,7 @@
 This project deploys a **production-ready serverless application** using AWS CloudFormation.
 
 ---
+<img width="2613" height="1534" alt="mermaid-diagram-2025-08-27-143132" src="https://github.com/user-attachments/assets/9041866e-7b04-4318-ae2c-31279bdd0f6c" />
 
 ## 🧱 Architecture Overview
 
