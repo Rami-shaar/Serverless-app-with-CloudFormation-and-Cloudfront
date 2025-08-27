@@ -4,7 +4,9 @@ This project deploys a complete, production-grade serverless application on AWS 
 
 ---
 <img width="2613" height="1534" alt="mermaid-diagram-2025-08-27-143132" src="https://github.com/user-attachments/assets/9041866e-7b04-4318-ae2c-31279bdd0f6c" />
-🖼️ Diagram generated using Mermaid Live Editor. Represents high-level flow between CloudFormation-provisioned infrastructure, frontend (CloudFront + S3 + OAC), backend API (API Gateway + Lambda + DynamoDB), and supporting services (IAM + CloudWatch).
+"Diagram generated using Mermaid Live Editor. Represents high-level flow between CloudFormation-provisioned infrastructure, frontend (CloudFront + S3 + OAC), backend API (API Gateway + Lambda + DynamoDB), and supporting services (IAM + CloudWatch)".
+
+---
 ## 🧱 Architecture Overview
 
 This serverless app includes:
